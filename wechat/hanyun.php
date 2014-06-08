@@ -60,8 +60,8 @@ function str_split_unicode($str, $l = 0) {
 
 $rev = $weObj->getRev();
 $type = $rev->getRevType();
-$toName = $rev->getRevTo();
-$userInfo = $weObj->getUserInfo($toName);
+$fromName = $rev->getRevFrom();
+$userInfo = $weObj->getUserInfo($fromName);
 switch($type) {
 
 	case Wechat::MSGTYPE_TEXT:
@@ -80,14 +80,14 @@ switch($type) {
 		}
 		else if(strpos($content, '小二')!== false || strpos($content, '打探')!== false || strpos($content, '更多')!== false){
 			$strArr = array('客官 我来啦~ 发送"小二"喊我一声 我就来陪大侠聊天唱曲儿咯。' . "\n"
-			. '发送春花雪月等关键字 我就会背诗给你听哦' . "\n" .  '欢迎关注 汉韵古风 微信号 hanyungufeng。 更多信息 请访问<a href="http://121.199.55.129/andy/wechat/yanhe/index.php?id=' . $toName . '" >汉韵古风</a>');
+			. '发送春花雪月等关键字 我就会背诗给你听哦' . "\n" .  '欢迎关注 汉韵古风 微信号 hanyungufeng。 更多信息 请访问<a href="http://121.199.55.129/andy/wechat/yanhe/index.php?id=' . $fromName . '" >汉韵古风</a>');
 
 		}
 		else
 		{
 			//process conversation
 			$validTime = strtotime('-2 hour');
-			$sql_conversation = "select * from conversation where openid = '$toName' and status = 1 and timestamp >= $validTime order by timestamp desc limit 1";
+			$sql_conversation = "select * from conversation where openid = '$fromName' and status = 1 and timestamp >= $validTime order by timestamp desc limit 1";
 			$sql_conversation_rst = $db_instance->query($sql_conversation);
 			if($sql_conversation_rst && $rows = $sql_conversation_rst->fetchAll())
 			{
@@ -107,7 +107,7 @@ switch($type) {
 						$weObj->text($userInfo['nickname'] . ' ' . $response)->reply();
 						if($content == '滾蛋' || $content == '滚蛋')
 						{
-							$sql_update_talk = "update talk set output = '$content', answererid = '$toName' where input = '$question'
+							$sql_update_talk = "update talk set output = '$content', answererid = '$fromName' where input = '$question'
 	 							and output is null";
 							$db_instance->exec($sql_update_talk);
 						}
@@ -187,7 +187,7 @@ switch($type) {
 						$row = $rows[array_rand($rows)];
 						$questionContent = $row['input'];
 						$question = "看客官谈吐不凡 正有一事请教。。 最近有人和小二说 '$questionContent', 在下愚钝 竟无言以对， 客官可否赐教一二？直接回复回答的内容就好咯~發送'滾蛋'結束對話";
-						$sql_insert_conversation = "insert into conversation (openid,content,typeid) values ('$toName','$questionContent',$QUESTION_TYPE_ID)";
+						$sql_insert_conversation = "insert into conversation (openid,content,typeid) values ('$fromName','$questionContent',$QUESTION_TYPE_ID)";
 						$db_instance->exec($sql_insert_conversation);
 					}
 						
@@ -230,7 +230,7 @@ switch($type) {
 			$key = $keyArr['event'];
 			switch($key) {
 				case 'subscribe':
-					$weObj->text('欢迎关注汉韵古风，你的关注证明你很有思想。' . "\n" . '发送"小二"或"打探"呼叫小二 获取使用说明。' . "\n" . '更多信息 请访问<a href="http://121.199.55.129/andy/wechat/yanhe/index.php?id=' . $toName .'">汉韵古风</a>')->reply();
+					$weObj->text('欢迎关注汉韵古风，你的关注证明你很有思想。' . "\n" . '发送"小二"或"打探"呼叫小二 获取使用说明。' . "\n" . '更多信息 请访问<a href="http://121.199.55.129/andy/wechat/yanhe/index.php?id=' . $fromName .'">汉韵古风</a>')->reply();
 					break;
 				case 'unsubscribe':
 					$weObj->text("不要啊，没有你，臣妾做不到啊")->reply();
